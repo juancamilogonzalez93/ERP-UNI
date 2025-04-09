@@ -67,7 +67,7 @@ export default function TeamPage() {
         onClick={() => setOpenForm(true)}
         sx={{ mb: 3 }}
       >
-        Agregar Miembro
+        Agregar Usuario
       </Button>
 
       {/* Diálogo del formulario */}
