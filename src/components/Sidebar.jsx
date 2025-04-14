@@ -1,39 +1,45 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Box } from '@mui/material';
-import { useTheme } from '@mui/material';
+import { Box, IconButton, Tooltip, useTheme } from '@mui/material';
 import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
-import {
-  People as TeamIcon,
-  Inventory as InventoryIcon,
-  Menu as MenuIcon,
-  ChevronLeft as CollapseIcon,
-  ChevronRight as ExpandIcon
-} from '@mui/icons-material';
-import { IconButton, Tooltip } from '@mui/material';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import PeopleIcon from '@mui/icons-material/People';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import StoreIcon from '@mui/icons-material/Store';
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import SettingsIcon from '@mui/icons-material/Settings';
+import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 export default function AppSidebar() {
   const theme = useTheme();
   const [collapsed, setCollapsed] = useState(false);
   const [broken, setBroken] = useState(false);
-  const [hovered, setHovered] = useState(false);
 
-  // Nueva forma de manejar el colapso sin useProSidebar
-  const handleCollapse = () => {
-    setCollapsed(!collapsed);
-  };
-
-  // Manejo responsivo mejorado
+  const handleCollapse = () => setCollapsed(!collapsed);
   const handleBreakpoint = (broken) => {
     setBroken(broken);
     if (broken) setCollapsed(true);
   };
 
+  // Configuración de los items del menú
+  const menuItems = [
+    { path: '/dashboard', title: 'Dashboard', icon: <DashboardIcon /> },
+    { path: '/team', title: 'Equipo', icon: <PeopleIcon /> },
+    { path: '/inventory', title: 'Inventario', icon: <InventoryIcon /> },
+    { path: '/suppliers', title: 'Proveedores', icon: <StoreIcon /> },
+    { path: '/sales', title: 'Ventas', icon: <PointOfSaleIcon /> },
+    { path: '/invoices', title: 'Facturas', icon: <ReceiptIcon /> },
+    { path: '/settings', title: 'Configuración', icon: <SettingsIcon /> }
+  ];
+
   return (
     <>
       {broken && (
         <IconButton
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={handleCollapse}
           sx={{
             position: 'fixed',
             top: 16,
@@ -41,9 +47,7 @@ export default function AppSidebar() {
             zIndex: 1200,
             backgroundColor: theme.palette.background.paper,
             boxShadow: 2,
-            '&:hover': {
-              backgroundColor: theme.palette.action.hover
-            }
+            '&:hover': { backgroundColor: theme.palette.action.hover }
           }}
         >
           <MenuIcon />
@@ -59,18 +63,16 @@ export default function AppSidebar() {
           position: 'fixed',
           borderRight: `1px solid ${theme.palette.divider}`,
           boxShadow: theme.shadows[4],
-          transition: 'all 0.3s ease-in-out'
+          transition: 'all 0.3s ease'
         }}
         collapsed={collapsed}
         onBreakpoint={handleBreakpoint}
         breakPoint="md"
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
       >
         <Menu>
           <MenuItem
             onClick={handleCollapse}
-            icon={collapsed ? <ExpandIcon /> : <CollapseIcon />}
+            icon={collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
             style={{
               margin: '10px 0',
               display: 'flex',
@@ -81,50 +83,38 @@ export default function AppSidebar() {
             {!collapsed && 'Minimizar'}
           </MenuItem>
 
-          {/* Items del menú con Tooltip corregido */}
-          <MenuItem 
-            component={<Link to="/team" />}
-            style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: collapsed ? 'center' : 'flex-start',
-              padding: collapsed ? '8px 12px' : '8px 16px'
-            }}
-          >
-            <Tooltip 
-              title="Equipo" 
-              placement="right" 
-              arrow
-              disableHoverListener={!collapsed}
+          {menuItems.map((item) => (
+            <MenuItem
+              key={item.path}
+              component={<Link to={item.path} />}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: collapsed ? 'center' : 'flex-start',
+                padding: collapsed ? '8px 12px' : '8px 16px',
+                margin: '4px 0'
+              }}
             >
-              <Box sx={{ display: 'inherit' }}>
-                <TeamIcon sx={{ mr: collapsed ? 0 : 1 }} />
-                {!collapsed && 'Equipo'}
-              </Box>
-            </Tooltip>
-          </MenuItem>
-
-          <MenuItem 
-            component={<Link to="/inventory" />}
-            style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: collapsed ? 'center' : 'flex-start',
-              padding: collapsed ? '8px 12px' : '8px 16px'
-            }}
-          >
-            <Tooltip 
-              title="Inventario" 
-              placement="right" 
-              arrow
-              disableHoverListener={!collapsed}
-            >
-              <Box sx={{ display: 'inherit' }}>
-                <InventoryIcon sx={{ mr: collapsed ? 0 : 1 }} />
-                {!collapsed && 'Inventario'}
-              </Box>
-            </Tooltip>
-          </MenuItem>
+              <Tooltip
+                title={item.title}
+                placement="right"
+                arrow
+                disableHoverListener={!collapsed}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box sx={{ 
+                    mr: collapsed ? 0 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    fontSize: '1.25rem'
+                  }}>
+                    {item.icon}
+                  </Box>
+                  {!collapsed && item.title}
+                </Box>
+              </Tooltip>
+            </MenuItem>
+          ))}
         </Menu>
       </Sidebar>
     </>
