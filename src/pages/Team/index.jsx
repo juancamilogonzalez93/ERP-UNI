@@ -1,9 +1,11 @@
+import { useState } from 'react';
+import TeamMemberForm from '../../components/TeamTable/TeamMemberForm';
 import { DataGrid } from '@mui/x-data-grid';
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Typography, useTheme, Button } from '@mui/material';
 
 const mockData = [
   { id: 1, name: 'CamiloG', email: 'ed@erp.com', role: 'Admin', status: 'Active' },
-  // ... más datos
+  // ... más datos ficticios
 ];
 
 const columns = [
@@ -45,10 +47,38 @@ const columns = [
 
 export default function TeamPage() {
   const theme = useTheme();
+  const [openForm, setOpenForm] = useState(false);
+  const [, setCurrentMember] = useState(null);
+
+  // Función para manejar el envío del formulario
+  const handleSubmit = (data) => {
+    console.log('Datos del formulario:', data);
+    // Aquí debes agregar la lógica para guardar en tu API o estado
+    setOpenForm(false);
+  };
 
   return (
     <Box ml="240px" p={3}>
-      <Typography variant="h2" mb={3}>Gestión de Equipo</Typography>
+      <Typography variant="h2" mb={3}>Gestión de Usuarios</Typography>
+      
+      {/* Botón para abrir el formulario */}
+      <Button 
+        variant="contained" 
+        onClick={() => setOpenForm(true)}
+        sx={{ mb: 3 }}
+      >
+        Agregar Usuario
+      </Button>
+
+      {/* Diálogo del formulario */}
+      <TeamMemberForm
+        open={openForm}
+        onClose={() => setOpenForm(false)}
+        data={setCurrentMember}
+        onSubmit={handleSubmit}
+      />
+
+      {/* Tabla de miembros */}
       <Box
         sx={{
           bgcolor: theme.palette.background.paper,

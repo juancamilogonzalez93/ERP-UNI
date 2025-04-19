@@ -1,30 +1,25 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, IconButton, Tooltip, useTheme } from '@mui/material';
-import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import PeopleIcon from '@mui/icons-material/People';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import StoreIcon from '@mui/icons-material/Store';
-import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-import SettingsIcon from '@mui/icons-material/Settings';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import {
+  Dashboard as DashboardIcon,
+  People as PeopleIcon,
+  Inventory as InventoryIcon,
+  Store as StoreIcon,
+  PointOfSale as PointOfSaleIcon,
+  Receipt as ReceiptIcon,
+  Settings as SettingsIcon,
+  Menu as MenuIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon
+} from '@mui/icons-material';
 
+// Componente Sidebar personalizado sin dependencias externas
 export default function AppSidebar() {
   const theme = useTheme();
   const [collapsed, setCollapsed] = useState(false);
-  const [broken, setBroken] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  const handleCollapse = () => setCollapsed(!collapsed);
-  const handleBreakpoint = (broken) => {
-    setBroken(broken);
-    if (broken) setCollapsed(true);
-  };
-
-  // Configuración de los items del menú
   const menuItems = [
     { path: '/dashboard', title: 'Dashboard', icon: <DashboardIcon /> },
     { path: '/team', title: 'Equipo', icon: <PeopleIcon /> },
@@ -35,88 +30,102 @@ export default function AppSidebar() {
     { path: '/settings', title: 'Configuración', icon: <SettingsIcon /> }
   ];
 
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const sidebarWidth = 260;
+  const collapsedWidth = 80;
+
   return (
     <>
-      {broken && (
-        <IconButton
-          onClick={handleCollapse}
+      {/* Botón para móviles */}
+      <IconButton
+        color="inherit"
+        aria-label="open drawer"
+        edge="start"
+        onClick={handleDrawerToggle}
+        sx={{
+          position: 'fixed',
+          top: 16,
+          left: 16,
+          zIndex: theme.zIndex.drawer + 1,
+          display: { xs: 'block', md: 'none' },
+        }}
+      >
+        <MenuIcon />
+      </IconButton>
+
+      {/* Sidebar */}
+      <Box
+        component="nav"
+        sx={{
+          width: { md: collapsed ? collapsedWidth : sidebarWidth },
+          flexShrink: { md: 0 },
+          transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
+        }}
+      >
+        <Box
           sx={{
+            width: { md: collapsed ? collapsedWidth : sidebarWidth },
+            height: '100vh',
             position: 'fixed',
-            top: 16,
-            left: 16,
-            zIndex: 1200,
+            borderRight: `1px solid ${theme.palette.divider}`,
             backgroundColor: theme.palette.background.paper,
-            boxShadow: 2,
-            '&:hover': { backgroundColor: theme.palette.action.hover }
+            boxShadow: theme.shadows[4],
+            overflowX: 'hidden',
+            transition: theme.transitions.create('width', {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.leavingScreen,
+            }),
+            display: { xs: mobileOpen ? 'block' : 'none', md: 'block' },
           }}
         >
-          <MenuIcon />
-        </IconButton>
-      )}
+          {/* Contenido del Sidebar */}
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end' }}>
+            <IconButton onClick={() => setCollapsed(!collapsed)}>
+              {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            </IconButton>
+          </Box>
 
-      <Sidebar
-        width="260px"
-        collapsedWidth={broken ? "0px" : "80px"}
-        backgroundColor={theme.palette.background.paper}
-        rootStyles={{
-          height: '100vh',
-          position: 'fixed',
-          borderRight: `1px solid ${theme.palette.divider}`,
-          boxShadow: theme.shadows[4],
-          transition: 'all 0.3s ease'
-        }}
-        collapsed={collapsed}
-        onBreakpoint={handleBreakpoint}
-        breakPoint="md"
-      >
-        <Menu>
-          <MenuItem
-            onClick={handleCollapse}
-            icon={collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-            style={{
-              margin: '10px 0',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}
-          >
-            {!collapsed && 'Minimizar'}
-          </MenuItem>
-
-          {menuItems.map((item) => (
-            <MenuItem
-              key={item.path}
-              component={<Link to={item.path} />}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                padding: collapsed ? '8px 12px' : '8px 16px',
-                margin: '4px 0'
-              }}
-            >
-              <Tooltip
-                title={item.title}
-                placement="right"
-                arrow
-                disableHoverListener={!collapsed}
+          <Box sx={{ px: 2 }}>
+            {menuItems.map((item) => (
+              <Box 
+                key={item.path} 
+                component={Link} 
+                to={item.path}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  textDecoration: 'none',
+                  color: theme.palette.text.primary,
+                  p: 1.5,
+                  borderRadius: 1,
+                  mb: 1,
+                  '&:hover': {
+                    backgroundColor: theme.palette.action.hover,
+                  },
+                }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Tooltip title={item.title} placement="right" arrow disableHoverListener={!collapsed}>
                   <Box sx={{ 
-                    mr: collapsed ? 0 : 1,
                     display: 'flex',
                     alignItems: 'center',
-                    fontSize: '1.25rem'
+                    justifyContent: collapsed ? 'center' : 'flex-start',
+                    width: '100%'
                   }}>
-                    {item.icon}
+                    <Box sx={{ mr: collapsed ? 0 : 2 }}>{item.icon}</Box>
+                    {!collapsed && item.title}
                   </Box>
-                  {!collapsed && item.title}
-                </Box>
-              </Tooltip>
-            </MenuItem>
-          ))}
-        </Menu>
-      </Sidebar>
+                </Tooltip>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      </Box>
     </>
   );
 }
