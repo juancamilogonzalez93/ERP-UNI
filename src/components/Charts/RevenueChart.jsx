@@ -1,17 +1,19 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+// src/components/Charts/RevenueChart.jsx
+import React from 'react';
+import { ResponsiveLine } from '@nivo/line';
+import { useTheme } from '@mui/material';
 
-const data = [
-  { month: 'Ene', revenue: 4000 },
-  { month: 'Feb', revenue: 3000 },
-];
+export default function RevenueChart({ data }) {
+  const theme = useTheme();
 
-export default function RevenueChart() {
   return (
-    <BarChart width={600} height={300} data={data}>
-      <Bar dataKey="revenue" fill="#8884d8" />
-      <XAxis dataKey="month" />
-      <YAxis />
-      <Tooltip />
-    </BarChart>
+    <div style={{ height: 400 }}>
+      <ResponsiveLine
+        data={data}
+        margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
+        colors={[theme.palette.primary.main]}
+        // ... más configuraciones de nivo
+      />
+    </div>
   );
 }
