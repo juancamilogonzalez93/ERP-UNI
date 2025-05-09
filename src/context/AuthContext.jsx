@@ -1,104 +1,96 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
-// Creamos el contexto
 const AuthContext = createContext();
 
-// Servicio seguro para localStorage
-const safeStorage = {
+const storage = {
   get: (key) => {
+    if (typeof window === 'undefined') return null;
     try {
-      if (typeof window !== 'undefined') {
-        const item = window.localStorage.getItem(key);
-        return item ? JSON.parse(item) : null;
-      }
-      return null;
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : null;
     } catch (error) {
-      console.error(`Error reading ${key} from localStorage:`, error);
+      console.error('Storage get error:', error);
       return null;
     }
   },
   set: (key, value) => {
+    if (typeof window === 'undefined') return false;
     try {
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, JSON.stringify(value));
-        return true;
-      }
-      return false;
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
     } catch (error) {
-      console.error(`Error writing ${key} to localStorage:`, error);
+      console.error('Storage set error:', error);
       return false;
     }
   }
 };
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [isReady, setIsReady] = useState(false);
+  const [authState, setAuthState] = useState({
+    user: null,
+    isReady: false,
+    error: null
+  });
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      const token = safeStorage.get('token');
-      if (token) {
-        setUser({ token });
-      }
-      setIsReady(true);
-    };
-
-    initializeAuth();
+    const token = storage.get('token');
+    setAuthState({
+      user: token ? { token } : null,
+      isReady: true,
+      error: null
+    });
   }, []);
 
   const login = async (credentials) => {
     try {
-      // Simulación de llamada a API
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Simulación de API
+      await new Promise(resolve => setTimeout(resolve, 300));
       
-      const fakeToken = 'fake-jwt-token-' + Math.random().toString(36).slice(2);
-      safeStorage.set('token', fakeToken);
-      setUser({ 
-        token: fakeToken, 
-        email: credentials.email,
-        // Agrega más datos de usuario según necesites
+      const token = 'mock-token-' + Math.random().toString(36).substr(2, 9);
+      storage.set('token', token);
+      
+      setAuthState({
+        user: { token, email: credentials.email },
+        isReady: true,
+        error: null
       });
       
       return { success: true };
     } catch (error) {
-      console.error('Login error:', error);
-      return { 
-        success: false, 
-        error: error.message || 'Error al iniciar sesión' 
-      };
+      const message = error.message || 'Error en el login';
+      setAuthState(prev => ({ ...prev, error: message }));
+      return { success: false, error: message };
     }
   };
 
   const logout = () => {
-    safeStorage.set('token', null);
-    setUser(null);
+    storage.set('token', null);
+    setAuthState({
+      user: null,
+      isReady: true,
+      error: null
+    });
     return { success: true };
   };
 
-  // Estado de carga mejorado
-  if (!isReady) {
-    return <div>Cargando autenticación...</div>; // O un spinner
-  }
-
   return (
-    <AuthContext.Provider value={{ 
-      user,
-      isAuthenticated: !!user?.token,
+    <AuthContext.Provider value={{
+      user: authState.user,
+      isAuthenticated: !!authState.user?.token,
+      isReady: authState.isReady,
+      error: authState.error,
       login,
-      logout,
-      isReady // Expone el estado de carga si es necesario
+      logout
     }}>
-      {children}
+      {authState.isReady ? children : <div>Cargando...</div>}
     </AuthContext.Provider>
   );
 }
 
-// Hook useAuth optimizado
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth debe usarse dentro de un AuthProvider');
+    throw new Error('useAuth debe usarse dentro de AuthProvider');
   }
   return context;
 };

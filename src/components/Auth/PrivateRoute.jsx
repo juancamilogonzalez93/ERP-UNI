@@ -1,18 +1,19 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import LoadingSpinner from './LoadingSpinner';
+import LoadingSpinner from '../Auth/LoadingSpinner';
 
-const PrivateRoute = () => {
-  const { isAuthenticated } = useAuth();
+export default function PrivateRoute({ children }) {
+  const { isAuthenticated, isReady } = useAuth();
   const location = useLocation();
 
-  if (isAuthenticated === null) {
-    return <LoadingSpinner />;
+  // Mostrar spinner mientras se verifica la autenticación
+  if (!isReady) return <LoadingSpinner />;
+
+  // Si no está autenticado, redirige al login
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return isAuthenticated 
-    ? <Outlet /> 
-    : <Navigate to="/login" state={{ from: location }} replace />;
-};
-
-export default PrivateRoute;
+  // Si está autenticado, renderiza el contenido protegido
+  return children;
+}
